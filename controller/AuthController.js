@@ -31,6 +31,16 @@ const registerUser = async (req, res) => {
     }
 
     try {
+        const userByUsername = await User.findOne({username: username});
+        if (userByUsername) {
+            res.status(400).json({error: 'User already exists'})
+            return
+        }
+        const userByEmail = await User.findOne({email: email});
+        if (userByEmail) {
+            res.status(400).json({error: 'Email already exists'})
+            return
+        }
         const userDoc = await User.create({
             name, 
             phone,
@@ -40,7 +50,7 @@ const registerUser = async (req, res) => {
         });
         res.status(201).json(userDoc);
     } catch (err) {
-        res.status(400).end('bad request')
+        res.status(400).json({error: 'Bad request'})
     }
 }
 
