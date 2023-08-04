@@ -1,4 +1,6 @@
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser')
 const User = require('../model/UserModel');
 
 const salt = bcrypt.genSaltSync(10);
@@ -54,4 +56,34 @@ const registerUser = async (req, res) => {
     }
 }
 
-module.exports = { registerUser }
+const loginUser = async (req, res) => {
+    const {username, password} = req.body;
+
+    if (!usernameFormat.test(username)) {
+        res.status(400).json({error: 'Invalid username! first character should be alphabet [A-Za-z] and other characters can be alphabets, numbers or an underscore so, [A-Za-z0-9_].'})
+        return
+    }
+    if (!passwordFormat.test(password)) {
+        res.status(400).json({error: 'password should have minimum of eight characters, at least one uppercase letter, one lowercase letter, one number and one special character:'})
+        return
+    }
+
+    try {
+        const userDoc = await User.findOne({ username })
+        if (!userDoc) {
+            res.status(400).json({error: 'Invalid Username'})
+            return
+        }
+        const isPasswordCorrect = bcrypt.compareSync(password, userDoc.password)
+        if (!isPasswordCorrect) {
+            res.status(400).json({error: 'Incorrect Password'})
+            return
+        }
+        const token = jwt.sign({ id: userDoc._id}, process.env.JWT_SECRET, {expiresIn: '1h'})
+        res.cookie('token', token, {httpOnly: true}).status(200).json({success: "User Logger In"})
+    } catch(err) {
+        res.end('err')
+    }
+}
+
+module.exports = { registerUser, loginUser }
