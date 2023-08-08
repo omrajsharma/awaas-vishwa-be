@@ -9,18 +9,6 @@ const authRoutes = require('./routes/AuthRoutes')
 /**
  * APP
  */
-var whitelist = ['https://awaas-vishwa.vercel.app',  /** other domains if any */ ]
-var corsOptions = {
-  credentials: true,
-  origin: function(origin, callback) {
-    console.log('origin', origin);
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS', origin))
-    }
-  }
-}
 const app = express();
 app.use(express.json());
 app.use(cors({
