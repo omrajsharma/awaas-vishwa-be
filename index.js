@@ -9,7 +9,7 @@ const authRoutes = require('./routes/AuthRoutes')
 /**
  * APP
  */
-var whitelist = ['http://localhost:5173', /** other domains if any */ ]
+var whitelist = ['http://localhost:5173', '*' /** other domains if any */ ]
 var corsOptions = {
   credentials: true,
   origin: function(origin, callback) {
