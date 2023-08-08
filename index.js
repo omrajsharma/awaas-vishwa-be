@@ -9,7 +9,7 @@ const authRoutes = require('./routes/AuthRoutes')
 /**
  * APP
  */
-var whitelist = ['*' /** other domains if any */ ]
+var whitelist = ['https://awaas-vishwa.vercel.app',  /** other domains if any */ ]
 var corsOptions = {
   credentials: true,
   origin: function(origin, callback) {
