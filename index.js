@@ -23,7 +23,10 @@ var corsOptions = {
 }
 const app = express();
 app.use(express.json());
-app.use(cors(corsOptions));
+app.use(cors({
+  credentials: true,
+  origin: ['https://awaas-vishwa.vercel.app'],
+}));
 
 
 /**
