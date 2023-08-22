@@ -82,4 +82,22 @@ const getItems = async (req, res) => {
     })
 }
 
-module.exports = { createItem, getItems };
+const getItemDetails = async (req, res) => {
+    const {itemId} = req.params;
+    if (itemId == null || itemId == undefined || itemId.length == 0) {
+        res.status(400).json({error: 'invalid item id'})
+        return
+    }
+    try {
+        const propertyAdDoc = await PropertyAd.findById(itemId)
+                                    .populate('author', ['name', 'phone', 'email']);
+        res.status(200).json({
+            data: propertyAdDoc
+        });
+    } catch (err) {
+        res.status(400).json({error: 'something went wrong'})
+        return
+    }
+}
+
+module.exports = { createItem, getItems, getItemDetails };
