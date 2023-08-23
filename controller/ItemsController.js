@@ -90,7 +90,7 @@ const getItemDetails = async (req, res) => {
     }
     try {
         const propertyAdDoc = await PropertyAd.findById(itemId)
-                                    .populate('author', ['name', 'phone', 'email']);
+                                    .populate('author', ['name']);
         res.status(200).json({
             data: propertyAdDoc
         });
