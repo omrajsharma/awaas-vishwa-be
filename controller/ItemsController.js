@@ -66,7 +66,7 @@ const getItems = async (req, res) => {
     const pageNo = req.query.page;
     const pageSize = 10;
     const skips = (pageNo -1) * pageSize;
-    const propertyAdList = await PropertyAd.find().skip(skips).limit(pageSize);
+    const propertyAdList = await PropertyAd.find().sort({_id: -1}).skip(skips).limit(pageSize);
     let propertyAdListResponse = []
 
     for (const propertyAdItem of propertyAdList ) {
