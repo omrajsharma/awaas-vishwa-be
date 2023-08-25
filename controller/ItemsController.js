@@ -1,5 +1,9 @@
 const jwt = require('jsonwebtoken');
 const PropertyAd = require('../model/PropertyAd');
+const UserModel  = require('../model/UserModel');
+const EnquiryMailModel = require('../model/EnquiryMailModel');
+const sendEmail = require('../utility/email/email')
+const {getBuyerEnquiryEmailBody} = require('../utility/email/emailTemplates')
 
 const createItem = async (req, res) => {
 
@@ -100,4 +104,54 @@ const getItemDetails = async (req, res) => {
     }
 }
 
-module.exports = { createItem, getItems, getItemDetails };
+const postLead = async (req, res) => {
+    const token = req.cookies.token;
+    const {itemId} = req.body;
+
+    if (!token) {
+        res.status(401).json({error: 'Invalid User'})
+        return
+    }
+    if (!itemId) {
+        res.status(400).json({error: 'Invalid ItemId'})
+        return
+    }
+
+    try {
+        const tokenInfo = jwt.verify(token, process.env.JWT_SECRET);
+        const senderUserDoc = await UserModel.findById(tokenInfo.id);
+        
+        const propertyAdDoc = await PropertyAd.findById(itemId);
+        const receiverDocId = propertyAdDoc.author.toString();
+        const receiverUserDoc = await UserModel.findById(receiverDocId);
+
+        const enquiryMailDoc = await EnquiryMailModel.findOne({
+            propertyAdId: itemId,
+            sendersId: senderUserDoc._id,
+            receiverId: receiverUserDoc._id
+        })
+
+        if (enquiryMailDoc) {
+            res.status(400).json({error: 'Already sent interest'})
+            return
+        }
+
+        sendEmail(
+            receiverUserDoc.email,
+            `An interested Lead for your property - Awaas Vishwa`,
+            getBuyerEnquiryEmailBody(receiverUserDoc.name, itemId, senderUserDoc.name, senderUserDoc.email, senderUserDoc.phone)
+        )
+
+        const enquiryMailDocNew = await EnquiryMailModel.create({
+            propertyAdId: itemId,
+            sendersId: senderUserDoc._id,
+            receiverId: receiverUserDoc._id
+        })
+
+        res.status(201).json({success: "Interest shared with the owner"})
+    } catch (err) {
+        res.status(500).json({error: 'Something went wrong'})
+    }
+}
+
+module.exports = { createItem, getItems, getItemDetails, postLead };
