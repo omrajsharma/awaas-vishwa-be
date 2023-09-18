@@ -65,14 +65,22 @@ const createItem = async (req, res) => {
 const getItems = async (req, res) => {
     const pageNo = req.query.page;
     const type = req.query.type;
+    const input = req.query.input;
+    const filter = {};
+    if(input){
+        filter.title = { $regex: "^" + input, $options: "i" };
+    }
+    if(type){
+        filter.listType = type ? type : {$exists: true};
+    }
     console.log(req.query, pageNo, type);
     const pageSize = 10;
     const skips = (pageNo -1) * pageSize;
     const propertyAdList = await PropertyAd
-                                .find({ listType: type ? type : {$exists: true} })
-                                .sort({_id: -1})
-                                .skip(skips)
-                                .limit(pageSize);
+                                    .find(filter)
+                                    .sort({_id: -1})
+                                    .skip(skips)
+                                    .limit(pageSize);
     let propertyAdListResponse = []
 
     for (const propertyAdItem of propertyAdList ) {
